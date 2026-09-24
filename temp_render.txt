@@ -1,0 +1,203 @@
+61:  return (
+62-    <div className="w-full min-h-screen bg-neo-bg bg-dot-grid text-[#1C1C1A] flex flex-col font-sans relative overflow-x-hidden p-6">
+63-      <header className="w-full max-w-2xl mx-auto mb-8 flex flex-col items-center">
+64-        <h1 className="text-xl font-bold tracking-widest uppercase text-gray-800 text-center">Living Causal Surface</h1>
+65-        <p className="text-xs text-gray-500 mt-2 text-center">Any Intent. Any Actor. True Reality.</p>
+66-        
+67-        {/* PHASE 6: CANONICAL MULTI-ACTOR PROJECTION */}
+68-        {committedActors.length > 0 && (
+69-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2 p-2 bg-white/50 backdrop-blur-md rounded-2xl shadow-neo-down border border-black/5">
+70-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-2 ml-2">Viewing As:</span>
+71-            <button 
+72-              onClick={() => { setCurrentProjection('owner'); setActiveContextId(null); }}
+73-              className={`text-xs font-bold py-1.5 px-3 rounded-xl transition-all ${currentProjection === 'owner' ? 'bg-indigo-600 text-white shadow-neo-down' : 'hover:bg-gray-100 text-gray-600'}`}
+74-            >
+75-              Owner
+76-            </button>
+77-            {committedActors.map(actor => (
+78-              <button 
+79-                key={actor.id}
+80-                onClick={() => { setCurrentProjection(actor.id); setActiveContextId(null); }}
+81-                className={`text-xs font-bold py-1.5 px-3 rounded-xl transition-all flex items-center gap-1.5 ${currentProjection === actor.id ? 'bg-emerald-600 text-white shadow-neo-down' : 'hover:bg-gray-100 text-gray-600'}`}
+82-              >
+83-                <User className="w-3.5 h-3.5" />
+84-                {actor.label}
+85-              </button>
+86-            ))}
+87-          </div>
+88-        )}
+89-      </header>
+90-
+91-      <div className="flex-1 w-full max-w-2xl mx-auto flex flex-col gap-6 items-center pb-32 pt-10">
+92-        <AnimatePresence>
+93-          {nodes.length === 0 && (
+94-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center text-gray-400 mt-20">
+95-              <Focus className="w-12 h-12 mx-auto mb-4 opacity-20" />
+96-              <p>State your intent to materialize reality.</p>
+97-            </motion.div>
+98-          )}
+99-
+100-          {projectedRoots.map(root => (
+101-            <NodeRenderer key={root.id} node={root} activeContextId={activeContextId} setActiveContextId={setActiveContextId} currentProjection={currentProjection} onOpenProvenance={setProvenanceNodeId} />
+102-          ))}
+103-          
+104-          {isComposing && (
+105-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center p-8 mt-10 text-indigo-500">
+106-              <Loader2 className="w-8 h-8 animate-spin mb-4" />
+107-              <p className="text-sm font-bold uppercase tracking-widest animate-pulse">Materializing Logic...</p>
+108-            </motion.div>
+109-          )}
+110-
+111-          {hypothesis && (
+112-            <motion.div 
+113-              initial={{ opacity: 0, y: 20 }} 
+114-              animate={{ opacity: 1, y: 0 }} 
+115-              className="w-full bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100 shadow-neo-up-lg mt-8"
+116-            >
+117-              <div className="flex items-center gap-3 mb-4">
+118-                <Sparkles className="w-6 h-6 text-indigo-600" />
+119-                <h3 className="font-bold text-indigo-900 text-lg">Causal Hypothesis</h3>
+120-              </div>
+121-              
+122-              <p className="text-gray-700 text-sm mb-6 leading-relaxed">{hypothesis.inferredMeaning}</p>
+123-              
+124-              <div className="flex flex-col gap-3">
+125-                <h4 className="text-xs font-bold text-gray-500 uppercase tracking-widest">Proposed Dependencies</h4>
+126-                {hypothesis.proposedDependencies.map((dep, idx) => (
+127-                  <div key={idx} className="bg-white p-3 rounded-xl shadow-2xs border border-black/5 flex items-start gap-3">
+128-                    <Package className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+129-                    <div>
+130-                      <p className="font-bold text-sm text-gray-800">{dep.label}</p>
+131-                      <p className="text-xs text-gray-500">{dep.rationale}</p>
+132-                    </div>
+133-                  </div>
+134-                ))}
+135-              </div>
+136-              
+137-              <div className="mt-8 flex gap-3">
+138-                <button 
+139-                  onClick={() => {
+140-                    clearHypothesis();
+141-                    setPendingContextId(null);
+142-                  }}
+143-                  className="px-4 py-2 rounded-xl font-bold text-sm text-gray-500 hover:bg-black/5 transition-colors"
+144-                >
+145-                  Reject
+146-                </button>
+147-                <button 
+148-                  onClick={() => {
+149-                    if (pendingContextId) {
+150-                      hypothesis.proposedDependencies.forEach(dep => {
+151-                        const depId = RealityEngine.addNode({
+152-                          type: 'DEPENDENCY',
+153-                          label: dep.label,
+154-                          state: 'UNKNOWN',
+155-                          attention: 80,
+156-                          data: { rationale: dep.rationale }
+157-                        });
+158-                        RealityEngine.addEdge(pendingContextId, depId, 'requires');
+159-                      });
+160-                    } else {
+161-                      const wantId = RealityEngine.addNode({
+--
+285:  return (
+286-    <div className="flex flex-col items-center w-full">
+287-      <motion.div 
+288-        layout="position"
+289-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+290-        animate={{ opacity: 1, y: 0, scale: 1 }}
+291-        className={baseClass}
+292-      >
+293-        {isHollow && (
+294-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/[0.03] animate-pulse pointer-events-none" />
+295-        )}
+296-
+297-        <div className="flex items-start justify-between">
+298-          <div className="flex items-center gap-3">
+299-            <div className={`${isCompact ? 'w-8 h-8' : 'w-10 h-10'} rounded-full bg-white shadow-neo-down flex items-center justify-center shrink-0`}>
+300-              {getIcon()}
+301-            </div>
+302-            <div>
+303-              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-0.5">
+304-                {node.type}
+305-              </span>
+306-              <span className={`font-bold text-gray-900 leading-tight ${isCompact ? 'text-sm' : 'text-base'}`}>
+307-                {node.label}
+308-              </span>
+309-            </div>
+310-          </div>
+311-          
+312-          
+313-          {/* State Badge and Escrow Orb */}
+314-          <div className="flex items-center gap-2">
+315-            {node.type === 'ACTOR' && ['COMMITTED', 'EXECUTING', 'VERIFYING'].includes(node.state) && (
+316-              <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 border border-amber-200 rounded-full shadow-neo-down animate-pulse">
+317-                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+318-                <Lock className="w-3 h-3 text-amber-600" />
+319-                <span className="text-[9px] font-bold text-amber-700 uppercase tracking-widest">Escrow Locked</span>
+320-              </div>
+321-            )}
+322-            {node.type === 'ACTOR' && node.state === 'RESOLVED' && (
+323-              <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 border border-emerald-200 rounded-full shadow-neo-down">
+324-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+325-                <Unlock className="w-3 h-3 text-emerald-600" />
+326-                <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-widest">Funds Released</span>
+327-              </div>
+328-            )}
+329-            <div className={`px-2.5 py-1 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase flex items-center gap-1 border
+330-            ${node.state === 'UNKNOWN' ? 'bg-gray-50 text-gray-500 border-gray-200' : ''}
+331-            ${node.state === 'POSSIBLE' ? 'bg-blue-50 text-blue-600 border-blue-200' : ''}
+332-            ${node.state === 'ASKING' ? 'bg-amber-50 text-amber-600 border-amber-300 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.2)]' : ''}
+333-            ${node.state === 'OFFERED' ? 'bg-purple-50 text-purple-600 border-purple-200' : ''}
+334-            ${node.state === 'COMMITTED' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : ''}
+335-            ${node.state === 'EXECUTING' ? 'bg-amber-50 text-amber-600 border-amber-300 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.2)]' : ''}
+336-            ${node.state === 'VERIFYING' ? 'bg-purple-50 text-purple-600 border-purple-300 shadow-[0_0_10px_rgba(168,85,247,0.2)]' : ''}
+337-            ${node.state === 'RESOLVED' ? 'bg-gray-900 text-white border-gray-900 shadow-sm' : ''}
+338-            ${node.state === 'FAILED' ? 'bg-red-50 text-red-600 border-red-200' : ''}
+339-          `}>
+340-            {(node.state === 'ASKING' || node.state === 'EXECUTING' || node.state === 'VERIFYING') && <span className="text-current">✦</span>}
+341-            {node.state}
+342-          </div>
+343-          </div>
+344-          
+345-          {/* Extended Metadata for Actor */}
+346-          {node.type === 'ACTOR' && node.data && (
+347-            <div className="flex gap-3 text-[10px] text-gray-500 font-medium mt-1">
+348-              <span className="truncate max-w-[120px]">{node.data.role}</span>
+349-              <div className="flex items-center gap-0.5">
+350-                <Star className="w-3 h-3 text-amber-500" />
+351-                <span>{node.data.rating}</span>
+352-              </div>
+353-              <div className="flex items-center gap-0.5">
+354-                <DollarSign className="w-3 h-3 text-emerald-600" />
+355-                <span>{node.data.cost}</span>
+356-              </div>
+357-            </div>
+358-          )}
+359-
+360-          {/* Extended Metadata for Evidence */}
+361-          {node.type === 'EVIDENCE' && node.data && (
+362-            <div className="flex gap-3 text-[10px] text-gray-500 font-medium mt-1">
+363-              <div className="flex items-center gap-1">
+364-                <FileText className="w-3 h-3" />
+365-                <span>{node.data.fileType} • {node.data.size}</span>
+366-              </div>
+367-              <div className="flex items-center gap-1">
+368-                <Clock className="w-3 h-3" />
+369-                <span>{node.data.timestamp}</span>
+370-              </div>
+371-            </div>
+372-          )}
+373-        </div>
+374-        
+375-        {/* Deep Semantic Bodies (The "Bla Bla") with Apple-like Expand/Collapse Hierarchy */}
+376-        {hasSemantics && (
+377-          <div className="mt-3 flex flex-col gap-2">
+378-            <div className={`transition-all duration-500 overflow-hidden ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-[42px] opacity-80'}`}>
+379-              
+380-              {node.data?.rationale && (
+381-                <div className="p-3 bg-neo-bg rounded-xl shadow-neo-down-sm text-xs text-gray-600 leading-relaxed font-medium mb-2 break-words">
+382-                  <span className="block text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1">Causal Requirement</span>
+383-                  <div className={isExpanded ? '' : 'line-clamp-1'}>{node.data.rationale}</div>
+384-                </div>
+385-              )}

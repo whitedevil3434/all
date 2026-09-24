@@ -1,0 +1,6 @@
+{
+  "name": "C-Link",
+  "description": "Living Causal Surface modeled after iOS Shortcuts.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

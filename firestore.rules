@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can read and write their own transient draft intents
+    match /users/{userId}/draft_intents/{draftId} {
+      allow read, write: if true;
+    }
+
+    // Works and all their causal subcollections
+    match /works/{workId} {
+      allow read, write: if true;
+
+      match /{subcollection=**} {
+        allow read, write: if true;
+      }
+    }
+
+    // Catch-all default
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

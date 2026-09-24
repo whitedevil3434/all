@@ -1,0 +1,185 @@
+{
+  "entities": {
+    "Work": {
+      "title": "Work",
+      "description": "A causal chain or project.",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "number", "description": "Timestamp" },
+        "status": { "type": "string", "enum": ["OPEN", "RESOLVED"], "maxLength": 20 }
+      },
+      "required": ["authorId", "createdAt", "status"]
+    },
+    "WorkActor": {
+      "title": "Work Actor Participation",
+      "description": "A specific actor's participation in a Work.",
+      "type": "object",
+      "properties": {
+        "actorId": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "maxLength": 128 },
+        "joinedAt": { "type": "number" }
+      },
+      "required": ["actorId", "role", "joinedAt"]
+    },
+    "Invitation": {
+      "title": "Invitation",
+      "description": "An invitation to join a work.",
+      "type": "object",
+      "properties": {
+        "workId": { "type": "string", "maxLength": 128 },
+        "needId": { "type": "string", "maxLength": 128 },
+        "capabilityId": { "type": "string", "maxLength": 128 },
+        "roleName": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["PENDING", "ACCEPTED"], "maxLength": 20 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["workId", "needId", "capabilityId", "roleName", "status", "createdAt"]
+    },
+    "Need": {
+      "title": "Need",
+      "description": "A specific required condition.",
+      "type": "object",
+      "properties": {
+        "workId": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 500 },
+        "quantity": { "type": "number" },
+        "unit": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "enum": ["OPEN", "RESOLVED"], "maxLength": 20 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["workId", "description", "status", "createdAt"]
+    },
+    "Capability": {
+      "title": "Capability",
+      "description": "An offered capability.",
+      "type": "object",
+      "properties": {
+        "workId": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["PROPOSED", "ACCEPTED"], "maxLength": 20 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["workId", "description", "status", "createdAt"]
+    },
+    "Responsibility": {
+      "title": "Responsibility",
+      "description": "An actor assigned to a capability.",
+      "type": "object",
+      "properties": {
+        "workId": { "type": "string", "maxLength": 128 },
+        "actorId": { "type": "string", "maxLength": 128 },
+        "needId": { "type": "string", "maxLength": 128 },
+        "capabilityId": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 500 },
+        "status": { "type": "string", "enum": ["PROPOSED", "COMMITTED", "DECLINED"], "maxLength": 20 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["workId", "actorId", "needId", "capabilityId", "status", "createdAt"]
+    },
+    "Commitment": {
+      "title": "Commitment",
+      "description": "An agreed responsibility.",
+      "type": "object",
+      "properties": {
+        "workId": { "type": "string", "maxLength": 128 },
+        "responsibilityId": { "type": "string", "maxLength": 128 },
+        "needId": { "type": "string", "maxLength": 128 },
+        "actorId": { "type": "string", "maxLength": 128 },
+        "terms": { "type": "object" },
+        "status": { "type": "string", "enum": ["COMMITTED", "FULFILLED", "BREACHED"], "maxLength": 20 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["workId", "responsibilityId", "actorId", "status", "createdAt"]
+    },
+    "Execution": {
+      "title": "Execution",
+      "description": "An action driven by a commitment.",
+      "type": "object",
+      "properties": {
+        "workId": { "type": "string", "maxLength": 128 },
+        "commitmentId": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 500 },
+        "state": { "type": "string", "enum": ["STARTED", "IN_PROGRESS", "BLOCKED", "FAILED", "COMPLETED"], "maxLength": 20 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["workId", "commitmentId", "description", "state", "createdAt"]
+    },
+    "Evidence": {
+      "title": "Evidence",
+      "description": "Proof of execution.",
+      "type": "object",
+      "properties": {
+        "workId": { "type": "string", "maxLength": 128 },
+        "executionId": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 500 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["workId", "executionId", "description", "createdAt"]
+    },
+    "Outcome": {
+      "title": "Outcome",
+      "description": "A verified result.",
+      "type": "object",
+      "properties": {
+        "workId": { "type": "string", "maxLength": 128 },
+        "needId": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 500 },
+        "state": { "type": "string", "enum": ["PROPOSED", "PARTIAL", "VERIFIED", "REJECTED"], "maxLength": 20 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["workId", "needId", "description", "state", "createdAt"]
+    },
+    "Relation": {
+      "title": "Relation",
+      "description": "Causal edges between nodes.",
+      "type": "object",
+      "properties": {
+        "workId": { "type": "string", "maxLength": 128 },
+        "from": { "type": "string", "maxLength": 128 },
+        "relation": { "type": "string", "maxLength": 50 },
+        "to": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["workId", "from", "relation", "to", "createdAt"]
+    },
+    "Event": {
+      "title": "Event",
+      "description": "Log of actions.",
+      "type": "object",
+      "properties": {
+        "workId": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "maxLength": 50 },
+        "actorId": { "type": "string", "maxLength": 128 },
+        "payload": { "type": "object" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["workId", "type", "actorId", "timestamp"]
+    },
+    "DraftIntent": {
+      "title": "Draft Intent",
+      "description": "Transient or proposed draft intent.",
+      "type": "object",
+      "properties": {
+        "authorId": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "maxLength": 50 },
+        "mutationType": { "type": "string", "maxLength": 50 }
+      }
+    }
+  },
+  "firestore": {
+    "works": { "schema": { "$ref": "#/entities/Work" }, "description": "Works" },
+    "works/{workId}/actors": { "schema": { "$ref": "#/entities/WorkActor" }, "description": "Actors in a work" },
+    "works/{workId}/invitations": { "schema": { "$ref": "#/entities/Invitation" }, "description": "Invitations" },
+    "works/{workId}/needs": { "schema": { "$ref": "#/entities/Need" }, "description": "Needs" },
+    "works/{workId}/capabilities": { "schema": { "$ref": "#/entities/Capability" }, "description": "Capabilities" },
+    "works/{workId}/responsibilities": { "schema": { "$ref": "#/entities/Responsibility" }, "description": "Responsibilities" },
+    "works/{workId}/commitments": { "schema": { "$ref": "#/entities/Commitment" }, "description": "Commitments" },
+    "works/{workId}/executions": { "schema": { "$ref": "#/entities/Execution" }, "description": "Executions" },
+    "works/{workId}/evidences": { "schema": { "$ref": "#/entities/Evidence" }, "description": "Evidences" },
+    "works/{workId}/outcomes": { "schema": { "$ref": "#/entities/Outcome" }, "description": "Outcomes" },
+    "works/{workId}/relations": { "schema": { "$ref": "#/entities/Relation" }, "description": "Relations" },
+    "works/{workId}/events": { "schema": { "$ref": "#/entities/Event" }, "description": "Events" },
+    "users/{userId}/draft_intents": { "schema": { "$ref": "#/entities/DraftIntent" }, "description": "Draft intents" }
+  }
+}

@@ -1,0 +1,46 @@
+import React, { useState, useEffect } from 'react';
+import { seedMemoriesIfEmpty } from './lib/vectorMemory';
+import { UniversalCausalSurface } from './components/universal/UniversalCausalSurface';
+import { DynamicRealitySurface } from './components/DynamicRealitySurface';
+import { LivingCausalSurface } from './components/LivingCausalSurface';
+import { DesktopExecutionSurface } from './components/DesktopExecutionSurface';
+import { DesktopWorkspace } from './components/DesktopWorkspace';
+import { CausalProvider } from './engine/causalStore';
+
+export type AppView = 'dynamic' | 'universal' | 'living' | 'desktop-topology' | 'full-workspace';
+
+function App() {
+  const [appView, setAppView] = useState<AppView>('dynamic');
+
+  useEffect(() => {
+    seedMemoriesIfEmpty();
+  }, []);
+
+  return (
+    <CausalProvider>
+      <div className="min-h-screen bg-dot-grid flex flex-col font-sans antialiased text-slate-900">
+        {appView === 'dynamic' ? (
+          <DynamicRealitySurface />
+        ) : appView === 'universal' ? (
+          <UniversalCausalSurface />
+        ) : appView === 'living' ? (
+          <LivingCausalSurface
+            onSwitchToDesktopTopology={() => setAppView('desktop-topology')}
+          />
+        ) : appView === 'desktop-topology' ? (
+          <DesktopExecutionSurface
+            onBackToLivingSurface={() => setAppView('universal')}
+          />
+        ) : (
+          <DesktopWorkspace
+            onSwitchToMobile={() => setAppView('universal')}
+          />
+        )}
+      </div>
+    </CausalProvider>
+  );
+}
+
+export default App;
+
+

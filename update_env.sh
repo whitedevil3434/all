@@ -1,0 +1,11 @@
+#!/bin/bash
+cat << 'INNER_EOF' > .env
+VITE_SUPABASE_URL="YOUR_SUPABASE_URL_HERE"
+VITE_SUPABASE_ANON_KEY="YOUR_SUPABASE_ANON_KEY"
+SUPABASE_SERVICE_ROLE_KEY="YOUR_SERVICE_ROLE_KEY_HERE"
+DATABASE_URL="postgresql://postgres.[PROJECT-REF]:[PASSWORD]@aws-0-aws-region.pooler.supabase.com:6543/postgres"
+
+# OpenAI Compatible Fallback
+OPENAI_API_KEY="freellmapi-aa9d98f48a300e8c6b8736ea4293ec9354627d3c43b27ad4"
+OPENAI_BASE_URL="http://localhost:3001/v1"
+INNER_EOF

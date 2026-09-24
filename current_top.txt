@@ -1,0 +1,151 @@
+10:export function DynamicRealitySurface() {
+11-  const graph = useRealityGraph();
+12-  const [isExpanded, setIsExpanded] = useState(false);
+13-  const [inputText, setInputText] = useState('');
+14-  const [isProcessing, setIsProcessing] = useState(false);
+15-
+16-  const { submitIntent, isComposing, hypothesis, clearHypothesis } = useUniversalCompose();
+17-  const [activeContextId, setActiveContextId] = useState<string | null>(null);
+18-  const [provenanceNodeId, setProvenanceNodeId] = useState<string | null>(null);
+19-  const [pendingContextId, setPendingContextId] = useState<string | null>(null);
+20-  const [currentProjection, setCurrentProjection] = useState<string>('owner');
+21-  const activeNode = activeContextId ? graph.nodes[activeContextId] : null;
+22-
+23-  const nodes = Object.values(graph.nodes);
+24-  
+25-  // Find the root WANT
+26-  const committedActors = nodes.filter(n => n.type === 'ACTOR' && n.state === 'COMMITTED');
+27-  
+28-  let projectedRoots = [];
+29-  if (currentProjection === 'owner') {
+30-    projectedRoots = nodes.filter(n => n.type === 'WANT');
+31-  } else {
+32-    // If viewing as an Actor, their root is the DEPENDENCY they are committed to
+33-    const actorEdges = Object.values(graph.edges).filter(e => e.targetId === currentProjection);
+34-    const parentDepIds = actorEdges.map(e => e.sourceId);
+35-    projectedRoots = parentDepIds.map(id => graph.nodes[id]).filter(Boolean);
+36-    // Ensure unique projected roots
+37-    projectedRoots = Array.from(new Map(projectedRoots.map(n => [n.id, n])).values());
+38-  }
+39-
+40-
+41-  const handleInput = async (e: React.FormEvent) => {
+42-    e.preventDefault();
+43-    if (!inputText.trim()) return;
+44-    
+45-    setIsProcessing(true);
+46-    causalAudio.playTick();
+47-    
+48-    // Simulate AI Semantic Envelope parsing
+49-    // In a real flow, this would call the AI / Context Engine
+50-    
+51-    try {
+52-      // If we are in actor projection, default context to the actor itself to attach children
+53-      const effectiveContextId = activeContextId || (currentProjection !== 'owner' ? currentProjection : null);
+54-      setPendingContextId(effectiveContextId);
+55-      await submitIntent(inputText, {});
+56-      setInputText('');
+57-    } finally {
+58-      setIsProcessing(false);
+59-    }
+60-  };
+61-
+62-  return (
+63-    <div className={`flex flex-col items-center w-full node-wrapper relative ${isExpanded || activeContextId === node.id || node.state === 'ASKING' || node.state === 'EXECUTING' ? 'node-is-focused z-10' : 'z-0'}`}>
+64-      <motion.div 
+65-        layout="position"
+66-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+67-        animate={{ opacity: 1, y: 0, scale: 1 }}
+68-        className={baseClass}
+69-      >
+70-        {isHollow && (
+71-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/[0.03] animate-pulse pointer-events-none" />
+72-        )}
+73-
+74-        <div className="flex items-start justify-between">
+75-          <div className="flex items-center gap-3">
+76-            <div className={`${isCompact ? 'w-8 h-8' : 'w-10 h-10'} rounded-full bg-white shadow-neo-down flex items-center justify-center shrink-0`}>
+77-              {getIcon()}
+78-            </div>
+79-            <div>
+80-              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-0.5">
+81-                {node.type}
+82-              </span>
+83-              <span className={`font-bold text-gray-900 leading-tight ${isCompact ? 'text-sm' : 'text-base'}`}>
+84-                {node.label}
+85-              </span>
+86-            </div>
+87-          </div>
+88-          
+89-          
+90-          {/* State Badge and Escrow Orb */}
+91-          <div className="flex items-center gap-2">
+92-            {node.type === 'ACTOR' && ['COMMITTED', 'EXECUTING', 'VERIFYING'].includes(node.state) && (
+93-              <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 border border-amber-200 rounded-full shadow-neo-down animate-pulse">
+94-                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+95-                <Lock className="w-3 h-3 text-amber-600" />
+96-                <span className="text-[9px] font-bold text-amber-700 uppercase tracking-widest">Escrow Locked</span>
+97-              </div>
+98-            )}
+99-            {node.type === 'ACTOR' && node.state === 'RESOLVED' && (
+100-              <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 border border-emerald-200 rounded-full shadow-neo-down">
+101-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+102-                <Unlock className="w-3 h-3 text-emerald-600" />
+103-                <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-widest">Funds Released</span>
+104-              </div>
+105-            )}
+106-            <div className={`px-2.5 py-1 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase flex items-center gap-1 border
+107-            ${node.state === 'UNKNOWN' ? 'bg-gray-50 text-gray-500 border-gray-200' : ''}
+108-            ${node.state === 'POSSIBLE' ? 'bg-blue-50 text-blue-600 border-blue-200' : ''}
+109-            ${node.state === 'ASKING' ? 'bg-amber-50 text-amber-600 border-amber-300 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.2)]' : ''}
+110-            ${node.state === 'OFFERED' ? 'bg-purple-50 text-purple-600 border-purple-200' : ''}
+111-            ${node.state === 'COMMITTED' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : ''}
+112-            ${node.state === 'EXECUTING' ? 'bg-amber-50 text-amber-600 border-amber-300 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.2)]' : ''}
+113-            ${node.state === 'VERIFYING' ? 'bg-purple-50 text-purple-600 border-purple-300 shadow-[0_0_10px_rgba(168,85,247,0.2)]' : ''}
+114-            ${node.state === 'RESOLVED' ? 'bg-gray-900 text-white border-gray-900 shadow-sm' : ''}
+115-            ${node.state === 'FAILED' ? 'bg-red-50 text-red-600 border-red-200' : ''}
+116-          `}>
+117-            {(node.state === 'ASKING' || node.state === 'EXECUTING' || node.state === 'VERIFYING') && <span className="text-current">✦</span>}
+118-            {node.state}
+119-          </div>
+120-          </div>
+121-          
+122-          {/* Extended Metadata for Actor */}
+123-          {node.type === 'ACTOR' && node.data && (
+124-            <div className="flex gap-3 text-[10px] text-gray-500 font-medium mt-1">
+125-              <span className="truncate max-w-[120px]">{node.data.role}</span>
+126-              <div className="flex items-center gap-0.5">
+127-                <Star className="w-3 h-3 text-amber-500" />
+128-                <span>{node.data.rating}</span>
+129-              </div>
+130-              <div className="flex items-center gap-0.5">
+131-                <DollarSign className="w-3 h-3 text-emerald-600" />
+132-                <span>{node.data.cost}</span>
+133-              </div>
+134-            </div>
+135-          )}
+136-
+137-          {/* Extended Metadata for Evidence */}
+138-          {node.type === 'EVIDENCE' && node.data && (
+139-            <div className="flex gap-3 text-[10px] text-gray-500 font-medium mt-1">
+140-              <div className="flex items-center gap-1">
+141-                <FileText className="w-3 h-3" />
+142-                <span>{node.data.fileType} • {node.data.size}</span>
+143-              </div>
+144-              <div className="flex items-center gap-1">
+145-                <Clock className="w-3 h-3" />
+146-                <span>{node.data.timestamp}</span>
+147-              </div>
+148-            </div>
+149-          )}
+150-        </div>
+151-        
+152-        {/* Deep Semantic Bodies (The "Bla Bla") with Apple-like Expand/Collapse Hierarchy */}
+153-        {hasSemantics && (
+154-          <div className="mt-3 flex flex-col gap-2">
+155-            <div className={`transition-all duration-500 overflow-hidden ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-[42px] opacity-80'}`}>
+156-              
+157-              {node.data?.rationale && (
+158-                <div className="p-3 bg-neo-bg rounded-xl shadow-neo-down-sm text-xs text-gray-600 leading-relaxed font-medium mb-2 break-words">
+159-                  <span className="block text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1">Causal Requirement</span>
+160-                  <div className={isExpanded ? '' : 'line-clamp-1'}>{node.data.rationale}</div>

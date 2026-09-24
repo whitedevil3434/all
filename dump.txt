@@ -1,0 +1,457 @@
+  const handleInput = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+    
+    setIsProcessing(true);
+    causalAudio.playTick();
+    
+    // Simulate AI Semantic Envelope parsing
+    // In a real flow, this would call the AI / Context Engine
+    
+    try {
+      // If we are in actor projection, default context to the actor itself to attach children
+      const effectiveContextId = activeContextId || (currentProjection !== 'owner' ? currentProjection : null);
+      setPendingContextId(effectiveContextId);
+      await submitIntent(inputText, {});
+      setInputText('');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className={`flex flex-col items-center w-full node-wrapper relative ${isExpanded || activeContextId === node.id || node.state === 'ASKING' || node.state === 'EXECUTING' ? 'node-is-focused z-10' : 'z-0'}`}>
+      <motion.div 
+        layout="position"
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        className={baseClass}
+      >
+        {isHollow && (
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/[0.03] animate-pulse pointer-events-none" />
+        )}
+
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`${isCompact ? 'w-8 h-8' : 'w-10 h-10'} rounded-full bg-white shadow-neo-down flex items-center justify-center shrink-0`}>
+              {getIcon()}
+            </div>
+            <div>
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest block mb-0.5">
+                {node.type}
+              </span>
+              <span className={`font-bold text-gray-900 leading-tight ${isCompact ? 'text-sm' : 'text-base'}`}>
+                {node.label}
+              </span>
+            </div>
+          </div>
+          
+          
+          {/* State Badge and Escrow Orb */}
+          <div className="flex items-center gap-2">
+            {node.type === 'ACTOR' && ['COMMITTED', 'EXECUTING', 'VERIFYING'].includes(node.state) && (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 border border-amber-200 rounded-full shadow-neo-down animate-pulse">
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+                <Lock className="w-3 h-3 text-amber-600" />
+                <span className="text-[9px] font-bold text-amber-700 uppercase tracking-widest">Escrow Locked</span>
+              </div>
+            )}
+            {node.type === 'ACTOR' && node.state === 'RESOLVED' && (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 border border-emerald-200 rounded-full shadow-neo-down">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                <Unlock className="w-3 h-3 text-emerald-600" />
+                <span className="text-[9px] font-bold text-emerald-700 uppercase tracking-widest">Funds Released</span>
+              </div>
+            )}
+            <div className={`px-2.5 py-1 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase flex items-center gap-1 border
+            ${node.state === 'UNKNOWN' ? 'bg-gray-50 text-gray-500 border-gray-200' : ''}
+            ${node.state === 'POSSIBLE' ? 'bg-blue-50 text-blue-600 border-blue-200' : ''}
+            ${node.state === 'ASKING' ? 'bg-amber-50 text-amber-600 border-amber-300 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.2)]' : ''}
+            ${node.state === 'OFFERED' ? 'bg-purple-50 text-purple-600 border-purple-200' : ''}
+            ${node.state === 'COMMITTED' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : ''}
+            ${node.state === 'EXECUTING' ? 'bg-amber-50 text-amber-600 border-amber-300 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.2)]' : ''}
+            ${node.state === 'VERIFYING' ? 'bg-purple-50 text-purple-600 border-purple-300 shadow-[0_0_10px_rgba(168,85,247,0.2)]' : ''}
+            ${node.state === 'RESOLVED' ? 'bg-gray-900 text-white border-gray-900 shadow-sm' : ''}
+            ${node.state === 'FAILED' ? 'bg-red-50 text-red-600 border-red-200' : ''}
+          `}>
+            {(node.state === 'ASKING' || node.state === 'EXECUTING' || node.state === 'VERIFYING') && <span className="text-current">✦</span>}
+            {node.state}
+          </div>
+          </div>
+          
+          {/* Extended Metadata for Actor */}
+          {node.type === 'ACTOR' && node.data && (
+            <div className="flex gap-3 text-[10px] text-gray-500 font-medium mt-1">
+              <span className="truncate max-w-[120px]">{node.data.role}</span>
+              <div className="flex items-center gap-0.5">
+                <Star className="w-3 h-3 text-amber-500" />
+                <span>{node.data.rating}</span>
+              </div>
+              <div className="flex items-center gap-0.5">
+                <DollarSign className="w-3 h-3 text-emerald-600" />
+                <span>{node.data.cost}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Extended Metadata for Evidence */}
+          {node.type === 'EVIDENCE' && node.data && (
+            <div className="flex gap-3 text-[10px] text-gray-500 font-medium mt-1">
+              <div className="flex items-center gap-1">
+                <FileText className="w-3 h-3" />
+                <span>{node.data.fileType} • {node.data.size}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                <span>{node.data.timestamp}</span>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Deep Semantic Bodies (The "Bla Bla") with Apple-like Expand/Collapse Hierarchy */}
+        {hasSemantics && (
+          <div className="mt-3 flex flex-col gap-2">
+            <div className={`transition-all duration-500 overflow-hidden ${isExpanded ? 'max-h-[500px] opacity-100' : 'max-h-[42px] opacity-80'}`}>
+              
+              {node.data?.rationale && (
+                <div className="p-3 bg-neo-bg rounded-xl shadow-neo-down-sm text-xs text-gray-600 leading-relaxed font-medium mb-2 break-words">
+                  <span className="block text-[9px] font-bold uppercase tracking-widest text-gray-400 mb-1">Causal Requirement</span>
+                  <div className={isExpanded ? '' : 'line-clamp-1'}>{node.data.rationale}</div>
+                </div>
+              )}
+              
+              {node.data?.unknowns && node.data.unknowns.length > 0 && (
+                <div className="p-3 bg-indigo-50/50 border border-indigo-100/50 rounded-xl shadow-inner text-xs text-indigo-700/80 leading-relaxed font-medium mb-2">
+                  <span className="block text-[9px] font-bold uppercase tracking-widest text-indigo-400 mb-1">Open Clarifications</span>
+                  {isExpanded ? (
+                    <ul className="list-disc pl-4 space-y-1">
+                      {node.data.unknowns.map((u: string, idx: number) => <li key={idx} className="break-words">{u}</li>)}
+                    </ul>
+                  ) : (
+                    <div className="line-clamp-1 text-[11px] opacity-80">{node.data.unknowns.join(' • ')}</div>
+                  )}
+                </div>
+              )}
+
+              {node.data?.proposal && node.state !== 'FAILED' && node.state !== 'COMMITTED' && node.state !== 'EXECUTING' && node.state !== 'VERIFYING' && node.state !== 'RESOLVED' && (
+                <div className="p-3 bg-amber-50/50 border border-amber-100/50 rounded-xl shadow-inner text-xs text-amber-800/80 leading-relaxed font-medium relative mb-2 break-words">
+                  <span className="block text-[9px] font-bold uppercase tracking-widest text-amber-500 mb-1">Actor Proposal</span>
+                  <div className={isExpanded ? '' : 'line-clamp-1'}>"{node.data.proposal}"</div>
+                </div>
+              )}
+
+              {node.data?.summary && (node.state === 'VERIFYING' || node.state === 'RESOLVED') && (
+                <div className="p-3 bg-blue-50/50 border border-blue-100/50 rounded-xl shadow-inner text-xs text-blue-800/80 leading-relaxed font-medium mb-2 break-words">
+                  <span className="block text-[9px] font-bold uppercase tracking-widest text-blue-500 mb-1">Work Summary</span>
+                  <div className={isExpanded ? '' : 'line-clamp-1'}>{node.data.summary}</div>
+                  {isExpanded && (
+                    <div className="mt-2 text-[9px] font-mono text-blue-400/80 bg-blue-100/50 px-2 py-1 rounded inline-block break-all">
+                      Hash: {node.data.hash}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Subtle Apple-style Toggle */}
+            <button 
+              onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+              className="flex items-center justify-center gap-1 py-1 text-[10px] font-bold tracking-widest uppercase text-gray-400 hover:text-gray-600 transition-colors w-full"
+            >
+              {isExpanded ? 'Collapse Data' : 'Expand Data'}
+              {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+          </div>
+        )}
+        
+        {/* Actions based on state */}
+        {/* Actions based on state */}
+        {node.type === 'WANT' && (
+          <div className="mt-3 flex gap-2">
+            <button 
+              onClick={() => onOpenProvenance(node.id)}
+              className="text-[10px] font-bold text-gray-500 bg-gray-100 py-1.5 px-3 rounded hover:bg-gray-200 transition-colors flex items-center gap-1.5"
+            >
+              <History className="w-3 h-3" />
+              View Provenance Ledger
+            </button>
+          </div>
+        )}
+
+        {node.state === 'POSSIBLE' && node.type === 'DEPENDENCY' && (
+          <div className="text-xs text-gray-500 mt-2 font-medium">
+            Candidates discovered. Waiting for assignment.
+          </div>
+        )}
+        
+        {node.state === 'POSSIBLE' && node.type === 'ACTOR' && (
+          <button 
+            onClick={() => {
+              causalAudio.playTick();
+              RealityEngine.updateNode(node.id, { state: 'ASKING' });
+              setTimeout(() => {
+                causalAudio.playCommitChord();
+                RealityEngine.updateNode(node.id, { state: 'OFFERED' });
+              }, 1500);
+            }}
+            className="text-xs font-bold text-emerald-600 bg-emerald-50 py-2 px-4 rounded-lg mt-2 hover:bg-emerald-100 transition-colors self-start"
+          >
+            Ask {node.label}
+          </button>
+        )}
+        
+        {node.state === 'OFFERED' && node.type === 'ACTOR' && (
+          <div className="flex gap-2 mt-2">
+            <button 
+              onClick={() => {
+                causalAudio.playSettleHarmony();
+                RealityEngine.updateNode(node.id, { state: 'COMMITTED' });
+                
+                // Find parent dependency and mark it COMMITTED
+                const edges = Object.values(RealityEngine.getGraph().edges);
+                const parentEdge = edges.find(e => e.targetId === node.id);
+                if (parentEdge) {
+                  RealityEngine.updateNode(parentEdge.sourceId, { state: 'COMMITTED' });
+                  
+                  // Reject other candidates
+                  const siblingEdges = edges.filter(e => e.sourceId === parentEdge.sourceId && e.targetId !== node.id);
+                  siblingEdges.forEach(e => {
+                    RealityEngine.updateNode(e.targetId, { state: 'FAILED' });
+                  });
+                }
+              }}
+              className="text-xs font-bold text-white bg-emerald-600 py-2 px-4 rounded-lg hover:bg-emerald-700 transition-colors"
+            >
+              Accept Offer
+            </button>
+            <button 
+              onClick={() => {
+                RealityEngine.updateNode(node.id, { state: 'FAILED' });
+                
+                // PHASE 11: AUTO-HEALING REALITY
+                const edges = Object.values(RealityEngine.getGraph().edges);
+                const parentEdge = edges.find(e => e.targetId === node.id && e.relation === 'candidate');
+                if (parentEdge) {
+                  const parentId = parentEdge.sourceId;
+                  setTimeout(() => {
+                    causalAudio.playTick();
+                    RealityEngine.updateNode(parentId, { state: 'ASKING' });
+                    
+                    setTimeout(() => {
+                      const parentNode = RealityEngine.getGraph().nodes[parentId];
+                      const newCand = getContextualActors(parentNode?.label || '', 1)[0];
+                      const newActorId = RealityEngine.addNode({
+                        type: 'ACTOR',
+                        label: newCand.label,
+                        state: 'POSSIBLE',
+                        attention: 100,
+                        data: newCand.data
+                      });
+                      RealityEngine.addEdge(parentId, newActorId, 'candidate');
+                      RealityEngine.updateNode(parentId, { state: 'POSSIBLE' });
+                      causalAudio.playSettleHarmony();
+                    }, 2000);
+                  }, 800);
+                }
+              }}
+              className="text-xs font-bold text-gray-500 bg-gray-100 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-1"
+            >
+              Decline
+            </button>
+          </div>
+        )}
+        
+        {node.state === 'COMMITTED' && node.type === 'ACTOR' && (
+          <div className="mt-3 flex gap-2">
+            <button 
+              onClick={() => setActiveContextId(activeContextId === node.id ? null : node.id)}
+              className={`text-[10px] font-bold py-1.5 px-3 rounded-md transition-colors ${activeContextId === node.id ? 'bg-indigo-600 text-white shadow-neo-down' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+            >
+              {activeContextId === node.id ? 'Exit Actor Projection' : 'Enter Actor Projection'}
+            </button>
+            {activeContextId === node.id && (
+              <button 
+                onClick={() => {
+                  causalAudio.playTick();
+                  RealityEngine.updateNode(node.id, { state: 'EXECUTING' });
+                }}
+                className="text-[10px] font-bold py-1.5 px-3 rounded-md bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors"
+              >
+                Begin Execution
+              </button>
+            )}
+          </div>
+        )}
+        
+        {node.state === 'EXECUTING' && node.type === 'ACTOR' && (
+          <div className="mt-3 flex flex-col gap-2">
+             <div className="text-xs text-amber-600 font-bold mb-1 animate-pulse">Executing Responsibility...</div>
+             {(currentProjection === node.id || activeContextId === node.id) && (
+               <button 
+                 onClick={() => {
+                   causalAudio.playSettleHarmony();
+                   // Submit Evidence
+                   const generatedEvidence = getContextualEvidence(node.data?.role || '');
+                   const evidenceId = RealityEngine.addNode({
+                     type: 'EVIDENCE',
+                     label: generatedEvidence.label,
+                     state: 'VERIFYING',
+                     data: {
+                       fileType: generatedEvidence.fileType,
+                       size: generatedEvidence.size,
+                       summary: generatedEvidence.summary,
+                       hash: generatedEvidence.hash,
+                       timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                     }
+                   });
+                   RealityEngine.addEdge(node.id, evidenceId, 'provides');
+                   RealityEngine.updateNode(node.id, { state: 'VERIFYING' });
+                   
+                   // Find parent dependency and mark it VERIFYING
+                   const edges = Object.values(RealityEngine.getGraph().edges);
+                   const parentEdge = edges.find(e => e.targetId === node.id && e.relation !== 'provides');
+                   if (parentEdge) {
+                     RealityEngine.updateNode(parentEdge.sourceId, { state: 'VERIFYING' });
+                   }
+                 }}
+                 className="text-xs font-bold py-2 px-4 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors self-start shadow-neo-down"
+               >
+                 Submit Proof / Evidence
+               </button>
+             )}
+          </div>
+        )}
+
+        {node.state === 'VERIFYING' && (node.type === 'ACTOR' || node.type === 'DEPENDENCY') && (
+          <div className="mt-3 flex flex-col gap-2">
+            <div className="text-xs text-purple-600 font-bold mb-1">Awaiting Verification...</div>
+            {/* If Owner or Parent Projection, can verify */}
+            {(currentProjection === 'owner' || (currentProjection !== node.id && node.type === 'ACTOR')) && (
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => {
+                    causalAudio.playCommitChord();
+                    RealityEngine.updateNode(node.id, { state: 'RESOLVED' });
+                    
+                    if (node.type === 'ACTOR') {
+                      const edges = Object.values(RealityEngine.getGraph().edges);
+                      const parentEdge = edges.find(e => e.targetId === node.id && e.relation !== 'provides');
+                      if (parentEdge) {
+                        RealityEngine.updateNode(parentEdge.sourceId, { state: 'RESOLVED' });
+                      }
+                    }
+                  }}
+                  className="text-xs font-bold py-2 px-4 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors shadow-neo-down flex items-center gap-2"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Verify & Resolve
+                </button>
+                
+                {/* PHASE 11: REJECT AND AUTO-HEAL */}
+                <button 
+                  onClick={() => {
+                    RealityEngine.updateNode(node.id, { state: 'FAILED' });
+                    
+                    if (node.type === 'ACTOR') {
+                      const edges = Object.values(RealityEngine.getGraph().edges);
+                      const parentEdge = edges.find(e => e.targetId === node.id && e.relation !== 'provides');
+                      if (parentEdge) {
+                        const parentId = parentEdge.sourceId;
+                        setTimeout(() => {
+                          causalAudio.playTick();
+                          RealityEngine.updateNode(parentId, { state: 'ASKING' });
+                          setTimeout(() => {
+                            const parentNode = RealityEngine.getGraph().nodes[parentId];
+                            const newCand = getContextualActors(parentNode?.label || '', 1)[0];
+                            const newActorId = RealityEngine.addNode({
+                              type: 'ACTOR',
+                              label: newCand.label,
+                              state: 'POSSIBLE',
+                              attention: 100,
+                              data: newCand.data
+                            });
+                            RealityEngine.addEdge(parentId, newActorId, 'candidate');
+                            RealityEngine.updateNode(parentId, { state: 'POSSIBLE' });
+                            causalAudio.playSettleHarmony();
+                          }, 2500);
+                        }, 1000);
+                      }
+                    }
+                  }}
+                  className="text-xs font-bold py-2 px-4 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors shadow-neo-down flex items-center gap-2"
+                >
+                  <AlertTriangle className="w-4 h-4" />
+                  Reject
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {node.state === 'VERIFYING' && node.type === 'EVIDENCE' && (
+          <div className="mt-1 flex gap-2">
+            <button 
+                onClick={() => {
+                  causalAudio.playSettleHarmony();
+                  RealityEngine.updateNode(node.id, { state: 'RESOLVED' });
+                }}
+                className="text-[10px] font-bold text-gray-500 bg-gray-100 py-1 px-3 rounded hover:bg-gray-200 transition-colors"
+            >
+              View Document
+            </button>
+          </div>
+        )}
+
+        {node.state === 'UNKNOWN' && node.type === 'DEPENDENCY' && (
+          <button 
+            onClick={() => {
+              causalAudio.playTick();
+              RealityEngine.updateNode(node.id, { state: 'ASKING' });
+              
+              // Simulate Actor Discovery (Phase 2 -> Phase 3 mapping)
+              setTimeout(() => {
+                causalAudio.playSettleHarmony();
+                
+                // Add a possible actor
+                const candidates = getContextualActors(node.label, 2);
+                candidates.forEach(cand => {
+                  const actorId = RealityEngine.addNode({
+                    type: 'ACTOR',
+                    label: cand.label,
+                    state: 'POSSIBLE',
+                    data: cand.data
+                  });
+                  RealityEngine.addEdge(node.id, actorId, 'candidate');
+                });
+                
+                // Update dependency state
+                RealityEngine.updateNode(node.id, { state: 'POSSIBLE' });
+              }, 1500);
+            }}
+            className="text-xs font-bold text-indigo-600 bg-indigo-50 py-2 px-4 rounded-lg mt-2 hover:bg-indigo-100 transition-colors self-start"
+          >
+            Find {node.label}
+          </button>
+        )}
+      </motion.div>
+      
+      {/* Render children recursively (Semantic Causal Threads) */}
+      {children.length > 0 && (
+        <div className="w-full pl-8 mt-5 flex flex-col gap-5 relative">
+          {/* Main vertical stem inheriting parent state opacity */}
+          <div className={`absolute left-[15px] top-[-10px] bottom-[30px] w-[2px] bg-gradient-to-b from-gray-300 via-gray-200/50 to-transparent rounded-full`} />
+          <AnimatePresence>
+            {children.map((child, idx) => (
+              <div key={child.id} className="relative w-full">
+                {/* Horizontal branch reflecting the CHILD's precise state */}
+                <div className={`absolute left-[-17px] top-[24px] w-[17px] h-[2px] rounded-full transition-all duration-500 ${getThreadClass(child.state)}`} />
+                <NodeRenderer node={child} activeContextId={activeContextId} setActiveContextId={setActiveContextId} currentProjection={currentProjection} onOpenProvenance={onOpenProvenance} />
+              </div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+    </div>
+  );
+}
