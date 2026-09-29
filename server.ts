@@ -321,11 +321,7 @@ CRITICAL:
   }
 
   // 3. Resilient semantic fallback: Always succeed with rich response and valid SemanticAction
-  return res.json({
-      response: "API is currently unavailable. But C-Link recorded your semantic intent.",
-      transientObservation: "✦ Intent recorded offline",
-      semanticAction: { type: "UNKNOWN" }
-    });
+  return res.json(fallbackSemanticAction(prompt));
 });
 
 // Phase 1 + 2: Universal Context + Outcome Discovery Engine Endpoint
