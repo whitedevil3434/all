@@ -1791,40 +1791,6 @@ export const CausalBentoRealitySurface: React.FC<CausalBentoRealitySurfaceProps>
           </button>
         </div>
 
-        {/* Center/Right: Floating Pill Composer (Exact from IMG_0359.JPG: ✦ Tell C-Link what should happen...) */}
-        <div className="flex items-center bg-white/95 border border-neutral-200/80 rounded-full px-4 py-2 sm:py-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] gap-2.5 w-full max-w-[320px] sm:max-w-[420px] md:max-w-[480px] transition-all focus-within:ring-2 focus-within:ring-neutral-400/25 focus-within:border-neutral-300">
-          <span className="text-neutral-500 text-xs sm:text-sm select-none">✦</span>
-          <input 
-            type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendDesire(inputText, activeDockedNode);
-              }
-            }}
-            placeholder={activeDockedNode ? `Ask or instruct about ${activeDockedNode.label}...` : "Tell C-Link what should happen..."}
-            className="bg-transparent border-0 outline-none text-xs sm:text-[13px] text-neutral-800 placeholder:text-neutral-400 flex-1 min-w-0 font-normal"
-          />
-          <button
-            onClick={handleToggleVoiceInput}
-            className={`p-1 rounded-full text-neutral-400 hover:text-neutral-800 transition-colors shrink-0 cursor-pointer ${isListening ? 'text-red-500 animate-pulse' : ''}`}
-            title="Voice action (Speech recognition)"
-          >
-            <Mic size={14} />
-          </button>
-          {inputText.trim() && (
-            <button
-              onClick={() => handleSendDesire(inputText, activeDockedNode)}
-              className="text-neutral-900 hover:text-black p-1 shrink-0 cursor-pointer"
-              title="Send action"
-            >
-              <Send size={12} />
-            </button>
-          )}
-        </div>
-
         {/* Right: Projection Switcher & Ledger */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <div className="flex items-center bg-neutral-200/50 p-0.5 rounded-full text-[10px]">
